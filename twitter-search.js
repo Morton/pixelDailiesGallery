@@ -3,6 +3,8 @@
  */
 
 var Twitter = require('twitter');
+var fs = require('fs');
+var jsonfile = require('jsonfile');
 
 // init
 var client = new Twitter({
@@ -57,10 +59,60 @@ function filterSearchResult(data) {
     });
 }
 
-loadTweets('#pixel_dailies @Pixel_Dailies ')//, 87938423)//undefined, 667087427480264705)//666968495817670657)
+function fileExists(filePath) {
+    try {
+        return fs.statSync(filePath).isFile();
+    }
+    catch (err) {
+        return false;
+    }
+}
+
+// load file
+var filename = 'data.json';
+var allTweets = {};
+
+if (fileExists(filename)) {
+    allTweets = jsonfile.readFileSync(filename);
+} else {
+    allTweets = {
+        meta: {
+            max_id: Number.MAX_VALUE,
+            since_id: undefined
+        },
+        tweets: []
+    };
+}
+
+// define correct tweet-range
+var max_id, since_id;
+if (allTweets.meta.max_id) {
+    max_id = allTweets.meta.max_id;
+    since_id = undefined;
+} else {
+    max_id = undefined;
+    since_id = allTweets.meta.since_id;
+}
+
+// process tweets
+loadTweets('#pixel_dailies @Pixel_Dailies ', max_id, since_id)
     .then(filterSearchResult)
     .then(function (tweets) {
-        console.log(tweets);
+        console.log("Got", tweets.tweets.length, "new", (max_id?"tail":"head"), "tweets.");
+
+        // Merge new tweets
+        if (tweets.meta.max_id < allTweets.meta.max_id) {
+            allTweets.meta.max_id = tweets.meta.max_id;
+        }
+        if (tweets.meta.since_id > allTweets.meta.since_id) {
+            allTweets.meta.since_id = tweets.meta.since_id;
+        }
+        allTweets.tweets = allTweets.tweets.concat(tweets.tweets);
+
+        console.log("Collection has", allTweets.tweets.length, " at all.");
+
+        // write to file
+        jsonfile.writeFileSync(filename, allTweets);
     })
     .catch(function (err) {
         console.error(err);
