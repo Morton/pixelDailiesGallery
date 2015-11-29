@@ -2,13 +2,9 @@
 <html>
     <script src="jspm_packages/system.js"></script>
     <script src="config.js"></script>
-    <script src="jspm_packages/github/components/jquery@2.1.4/jquery.min.js"></script>
-    <script src="jspm_packages/npm/materialize-css@0.97.3/dist/js/materialize.min.js"></script>
-    <link rel="stylesheet" href="jspm_packages/npm/materialize-css@0.97.3/dist/css/materialize.css">
-    <link rel="stylesheet" href="css/index.css">
     <script>
-//        System.import('materialize-css');
-        System.import('js/main.js');
+        System.import('./css/index.css!');
+        System.import('./js/main.js');
     </script>
     <body>
         <div id="ReactContainer"></div>
