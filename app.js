@@ -10,7 +10,7 @@ allTweets = jsonfile.readFileSync(filename);
 // setup express.js
 var app = express();
 app.use(logger('dev'));
-app.use(express.static(path.join(__dirname, 'public')));
+app.use('/public', express.static(path.join(__dirname, 'public')));
 
 // express.js routes
 app.use('/api/tweets/:topic', function (req, res) {
@@ -26,4 +26,4 @@ app.use('/api/topics', function (req, res) {
 });
 
 // startup server
-var server = app.listen(3000, () => console.log('Server is running.'));
+var server = app.listen(process.env.PORT || 80, () => console.log('Server is running.'));
