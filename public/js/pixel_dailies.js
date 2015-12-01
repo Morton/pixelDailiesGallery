@@ -97,16 +97,18 @@ var Pixel_dailies = React.createClass({
                     </div>
                     <div className="col l9 -push-l3">
                         <div className="row">
-                            {(this.state.currentTopic.tweets || []).map((tweet) => (
-                                <div key={tweet.id} className="col l4 m6 s12">
-                                    <Card>
-                                        <CardImage src={tweet.image}/>
-                                        <CardContent>{tweet.text}</CardContent>
-                                        <CardAction href={'http://www.twitter.com/'+tweet.author}
-                                                    target="_blank">{'@' + tweet.author}</CardAction>
-                                    </Card>
+                            {[0, 1, 2].map((vi)=>
+                                <div key={'col'+vi} className="col l4 m6 s12">
+                                    {(this.state.currentTopic.tweets || []).filter((v, i) => (i%3 == vi)).map((tweet) => (
+                                        <Card key={tweet.id}>
+                                            <CardImage src={tweet.image}/>
+                                            <CardContent>{tweet.text}</CardContent>
+                                            <CardAction href={'http://www.twitter.com/'+tweet.author}
+                                                        target="_blank">{'@' + tweet.author}</CardAction>
+                                        </Card>
+                                    ), this)}
                                 </div>
-                            ), this)}
+                            )}
                         </div>
                     </div>
                 </div>)}
