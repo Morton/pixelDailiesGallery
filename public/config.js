@@ -18,8 +18,11 @@ System.config({
     "babel-runtime": "npm:babel-runtime@5.8.34",
     "core-js": "npm:core-js@1.2.6",
     "css": "github:systemjs/plugin-css@0.1.20",
+    "events": "npm:events@1.1.0",
+    "flux": "npm:flux@2.1.1",
     "jquery": "github:components/jquery@2.1.4",
     "materialize-css": "npm:materialize-css@0.97.3",
+    "object-assign": "npm:object-assign@4.0.1",
     "react": "npm:react@0.14.3",
     "react-dom": "npm:react-dom@0.14.3",
     "react-materialize": "npm:react-materialize@0.14.0-beta3",
@@ -230,6 +233,18 @@ System.config({
       "create-hash": "npm:create-hash@1.1.2",
       "crypto": "github:jspm/nodelibs-crypto@0.1.0"
     },
+    "npm:fbemitter@2.0.0": {
+      "fbjs": "npm:fbjs@0.1.0-alpha.7",
+      "process": "github:jspm/nodelibs-process@0.1.2"
+    },
+    "npm:fbjs@0.1.0-alpha.7": {
+      "core-js": "npm:core-js@1.2.6",
+      "fs": "github:jspm/nodelibs-fs@0.1.2",
+      "path": "github:jspm/nodelibs-path@0.1.0",
+      "process": "github:jspm/nodelibs-process@0.1.2",
+      "promise": "npm:promise@7.0.4",
+      "whatwg-fetch": "npm:whatwg-fetch@0.9.0"
+    },
     "npm:fbjs@0.3.2": {
       "core-js": "npm:core-js@1.2.6",
       "loose-envify": "npm:loose-envify@1.1.0",
@@ -237,6 +252,12 @@ System.config({
       "promise": "npm:promise@7.0.4",
       "ua-parser-js": "npm:ua-parser-js@0.7.9",
       "whatwg-fetch": "npm:whatwg-fetch@0.9.0"
+    },
+    "npm:flux@2.1.1": {
+      "fbemitter": "npm:fbemitter@2.0.0",
+      "fbjs": "npm:fbjs@0.1.0-alpha.7",
+      "immutable": "npm:immutable@3.7.5",
+      "process": "github:jspm/nodelibs-process@0.1.2"
     },
     "npm:hash.js@1.0.3": {
       "inherits": "npm:inherits@2.0.1"
