@@ -92,13 +92,13 @@ var Pixel_dailies = React.createClass({
                 </div>
             </div> :
                 <div className="row">
-                    <div className="col s3 menu">
+                    <div className="col l3 menu">
                         <TopicList topics={this.state.topics} selectedTopic={this.state.currentTopic.name}/>
                     </div>
-                    <div className="col s9 -push-s3">
+                    <div className="col l9 -push-l3">
                         <div className="row">
                             {(this.state.currentTopic.tweets || []).map((tweet) => (
-                                <div key={tweet.id} className="col s4">
+                                <div key={tweet.id} className="col l4 m6 s12">
                                     <Card>
                                         <CardImage src={tweet.image}/>
                                         <CardContent>{tweet.text}</CardContent>
