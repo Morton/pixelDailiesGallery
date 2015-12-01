@@ -5,7 +5,7 @@ import React from 'react';
 
 var Collections = React.createClass({
     render: function() {
-        return <ul className="collection">
+        return <ul className="collection hover">
             {this.props.children}
         </ul>;
     }

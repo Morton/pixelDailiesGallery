@@ -1,7 +1,13 @@
-/*.menu {*/
-    /*overflow: scroll;*/
-    /*position: fixed;*/
-/*}*/
-/*.fixed {*/
-    /*position: fixed;*/
-/*}*/
+.menu {
+    overflow: scroll;
+    position: fixed;
+}
+.fixed {
+    position: fixed;
+}
+.hover {
+    z-index: 10;
+}
+nav + .row:first-of-type {
+    padding-top: 64px;
+}

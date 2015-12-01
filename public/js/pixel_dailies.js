@@ -95,7 +95,7 @@ var Pixel_dailies = React.createClass({
                     <div className="col l3 menu">
                         <TopicList topics={this.state.topics} selectedTopic={this.state.currentTopic.name}/>
                     </div>
-                    <div className="col l9 -push-l3">
+                    <div className="col l9 push-l3">
                         <div className="row">
                             {[0, 1, 2].map((vi)=>
                                 <div key={'col'+vi} className="col l4 m6 s12">
