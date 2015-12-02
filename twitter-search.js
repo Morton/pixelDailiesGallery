@@ -2,9 +2,8 @@
  * Created by morton on 18/11/15.
  */
 
+var persistenceService = require('./persistence.js');
 var Twitter = require('twitter');
-var fs = require('fs');
-var jsonfile = require('jsonfile');
 
 // init
 var client = new Twitter({
@@ -109,50 +108,25 @@ function filterTopics(data) {
     });
 }
 
-function fileExists(filePath) {
-    try {
-        return fs.statSync(filePath).isFile();
-    }
-    catch (err) {
-        return false;
-    }
-}
-
-// load file
-var filename = 'data.json';
-var allTweets = {};
-
-if (fileExists(filename)) {
-    allTweets = jsonfile.readFileSync(filename);
-} else {
-    allTweets = {
-        meta: {
-            max_id: Number.MAX_VALUE,
-            since_id: undefined,
-            topics_max_id: Number.MAX_VALUE,
-            topics_since_id: undefined
-        },
-        tweets: [],
-        topics: []
-    };
-}
-
 // define correct tweet-range
 var max_id, since_id, topics_max_id, topics_since_id;
-if (allTweets.meta.max_id) {
-    max_id = allTweets.meta.max_id;
+if (persistenceService.getTweetsMaxId()) {
+    max_id = persistenceService.getTweetsMaxId();
     since_id = undefined;
 } else {
     max_id = undefined;
-    since_id = allTweets.meta.since_id;
+    since_id = persistenceService.getTweetsSinceId();
 }
-if (allTweets.meta.topics_max_id) {
-    topics_max_id = allTweets.meta.topics_max_id;
+if (persistenceService.getTopicsMaxId()) {
+    topics_max_id = persistenceService.getTopicsMaxId();
     topics_since_id = undefined;
 } else {
     topics_max_id = undefined;
-    topics_since_id = allTweets.meta.topics_since_id;
+    topics_since_id = persistenceService.getTopicsSinceId();
 }
+
+console.log('tweets', max_id, since_id);
+console.log('topics', topics_max_id, topics_since_id);
 
 // process tweets
 loadTweets('#pixel_dailies @Pixel_Dailies ', max_id, since_id)
@@ -163,8 +137,14 @@ loadTweets('#pixel_dailies @Pixel_Dailies ', max_id, since_id)
             .then(function (topics) {
                 console.log("Got", topics.topics.length, "new", (topics_max_id?"tail":"head"), "topics.");
 
+                //topics.meta.max_id = parseInt(topics.meta.max_id);
+                //console.log(tweets.meta.topics_max_id, topics.meta.max_id);
                 tweets.meta.topics_max_id = topics.meta.max_id;
+
+                //topics.meta.since_id = parseInt(topics.meta.since_id);
+                //console.log(tweets.meta.topics_since_id, topics.meta.since_id);
                 tweets.meta.topics_since_id = topics.meta.since_id;
+
                 tweets.topics = topics.topics;
                 res(tweets);
             })
@@ -176,26 +156,23 @@ loadTweets('#pixel_dailies @Pixel_Dailies ', max_id, since_id)
         console.log("Got", tweets.tweets.length, "new", (max_id?"tail":"head"), "tweets.");
 
         // Merge new tweets
-        if (tweets.meta.max_id < allTweets.meta.max_id) {
-            allTweets.meta.max_id = tweets.meta.max_id;
-        }
-        if (tweets.meta.since_id > allTweets.meta.since_id) {
-            allTweets.meta.since_id = tweets.meta.since_id;
-        }
-        if (tweets.meta.topics_max_id < allTweets.meta.topics_max_id) {
-            allTweets.meta.topics_max_id = tweets.meta.topics_max_id;
-        }
-        if (tweets.meta.topics_since_id > allTweets.meta.topics_since_id) {
-            allTweets.meta.topics_since_id = tweets.meta.topics_since_id;
-        }
-        allTweets.tweets = allTweets.tweets.concat(tweets.tweets);
-        allTweets.topics = allTweets.topics.concat(tweets.topics);
+        //if (tweets.meta.max_id < allTweets.meta.max_id) {
+        persistenceService.setTweetsMaxId(tweets.meta.max_id);
+        //}
+        //if (tweets.meta.since_id > allTweets.meta.since_id) {
+        persistenceService.setTweetsSinceId(tweets.meta.since_id);
+        //}
+        //if (tweets.meta.topics_max_id < allTweets.meta.topics_max_id) {
+        persistenceService.setTopicsMaxId(tweets.meta.topics_max_id);
+        //}
+        //if (tweets.meta.topics_since_id > allTweets.meta.topics_since_id) {
+        persistenceService.setTopicsSinceId(tweets.meta.topics_since_id);
+        //}
+        persistenceService.setTweets(persistenceService.getTweets().concat(tweets.tweets));
+        persistenceService.setTopics(persistenceService.getTopics().concat(tweets.topics));
 
-        console.log("Collection has", allTweets.tweets.length, "tweets and", allTweets.topics.length, "topics at all.");
-
-        // write to file
-        jsonfile.writeFileSync(filename, allTweets);
+        console.log("Collection has", persistenceService.getTweets().length, "tweets and", persistenceService.getTopics().length, "topics at all.");
     })
     .catch(function (err) {
         console.error(err);
-    });
+    })
