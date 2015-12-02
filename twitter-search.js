@@ -15,7 +15,13 @@ var client = new Twitter({
 
 function loadTweets(q, max_id, since_id) {
     return new Promise(function (res, rej) {
-        client.get('search/tweets', {max_id: max_id, since_id: since_id, q: q, count: 100, result_type: 'recent'}, function (error, tweets) {
+        client.get('search/tweets', {
+            max_id: max_id,
+            since_id: since_id,
+            q: q,
+            count: 100,
+            result_type: 'recent'
+        }, function (error, tweets) {
             if (error) {
                 rej(error);
             }
@@ -43,17 +49,17 @@ function filterSearchResult(data) {
             // only tweets by pixel_dailies can contain topics
             return v.user.screen_name.toLowerCase() == 'pixel_dailies';
         })/*.map(function (v) {
-            return {
-                text: v.text,
-                creation_date: v.created_at,
-                hashtags: (v.entities.hashtags ? v.entities.hashtags.map(function (v) { return v.text }) : []),
-                mentions: (v.entities.user_mentions ? v.entities.user_mentions.map(function (v) { return v.screen_name }) : []),
-                medias: (v.entities.media ? v.entities.media.map(function (v) { return { url: v.media_url, type: v.type } }) : []),
-                id: v.id,
-                user_id: v.user.screen_name,
-                user_name: v.user.name
-            };
-        })*/;
+         return {
+         text: v.text,
+         creation_date: v.created_at,
+         hashtags: (v.entities.hashtags ? v.entities.hashtags.map(function (v) { return v.text }) : []),
+         mentions: (v.entities.user_mentions ? v.entities.user_mentions.map(function (v) { return v.screen_name }) : []),
+         medias: (v.entities.media ? v.entities.media.map(function (v) { return { url: v.media_url, type: v.type } }) : []),
+         id: v.id,
+         user_id: v.user.screen_name,
+         user_name: v.user.name
+         };
+         })*/;
         result.tweets = data.statuses.filter(function (v) {
             // ignore RTs
             if (v.text.substr(0, 3) === "RT ") {
@@ -65,9 +71,15 @@ function filterSearchResult(data) {
             return {
                 text: v.text,
                 creation_date: v.created_at,
-                hashtags: (v.entities.hashtags ? v.entities.hashtags.map(function (v) { return v.text }) : []),
-                mentions: (v.entities.user_mentions ? v.entities.user_mentions.map(function (v) { return v.screen_name }) : []),
-                medias: (v.entities.media ? v.entities.media.map(function (v) { return { url: v.media_url, type: v.type } }) : []),
+                hashtags: (v.entities.hashtags ? v.entities.hashtags.map(function (v) {
+                    return v.text
+                }) : []),
+                mentions: (v.entities.user_mentions ? v.entities.user_mentions.map(function (v) {
+                    return v.screen_name
+                }) : []),
+                medias: (v.entities.media ? v.entities.media.map(function (v) {
+                    return {url: v.media_url, type: v.type}
+                }) : []),
                 id: v.id,
                 user_id: v.user.screen_name,
                 user_name: v.user.name
@@ -99,7 +111,9 @@ function filterTopics(data) {
             return {
                 text: v.text,
                 creation_date: v.created_at,
-                hashtags: (v.entities.hashtags ? v.entities.hashtags.map(function (v) { return v.text }) : []),
+                hashtags: (v.entities.hashtags ? v.entities.hashtags.map(function (v) {
+                    return v.text
+                }) : []),
                 id: v.id
             };
         });
@@ -108,71 +122,101 @@ function filterTopics(data) {
     });
 }
 
-// define correct tweet-range
-var max_id, since_id, topics_max_id, topics_since_id;
-if (persistenceService.getTweetsMaxId()) {
-    max_id = persistenceService.getTweetsMaxId();
-    since_id = undefined;
-} else {
-    max_id = undefined;
-    since_id = persistenceService.getTweetsSinceId();
-}
-if (persistenceService.getTopicsMaxId()) {
-    topics_max_id = persistenceService.getTopicsMaxId();
-    topics_since_id = undefined;
-} else {
-    topics_max_id = undefined;
-    topics_since_id = persistenceService.getTopicsSinceId();
-}
 
-console.log('tweets', max_id, since_id);
-console.log('topics', topics_max_id, topics_since_id);
+// process
+Promise.all([
+    Promise.all([persistenceService.getTweetsMaxId(), persistenceService.getTweetsSinceId()])
+        .then(function (args) {
+            var _max_id = args[0];
+            var _since_id = args[1];
 
-// process tweets
-loadTweets('#pixel_dailies @Pixel_Dailies ', max_id, since_id)
-    .then(filterSearchResult)
-    .then((tweets) => new Promise((res, rej) => {
-        loadTweets('from:Pixel_Dailies ', topics_max_id, topics_since_id)
-            .then(filterTopics)
-            .then(function (topics) {
-                console.log("Got", topics.topics.length, "new", (topics_max_id?"tail":"head"), "topics.");
+            if (_max_id) {
+                max_id = _max_id;
+                since_id = undefined;
+            } else {
+                max_id = undefined;
+                since_id = _since_id;
+            }
 
-                //topics.meta.max_id = parseInt(topics.meta.max_id);
-                //console.log(tweets.meta.topics_max_id, topics.meta.max_id);
-                tweets.meta.topics_max_id = topics.meta.max_id;
+            console.log('tweets', max_id, since_id);
 
-                //topics.meta.since_id = parseInt(topics.meta.since_id);
-                //console.log(tweets.meta.topics_since_id, topics.meta.since_id);
-                tweets.meta.topics_since_id = topics.meta.since_id;
+            return [max_id, since_id];
+        })
+        .then(function (args) {
+            var max_id = args[0];
+            var since_id = args[1];
 
-                tweets.topics = topics.topics;
-                res(tweets);
-            })
-            .catch(function (err) {
-                rej(err);
-            });
-    }))
+            return loadTweets('#pixel_dailies @Pixel_Dailies ', max_id, since_id)
+        })
+        .then(filterSearchResult)
+        .then(function (tweets) {
+            console.log("Got", tweets.tweets.length, "new", "tweets.");
+            return tweets;
+        }),
+    Promise.all([persistenceService.getTopicsMaxId(), persistenceService.getTopicsSinceId()])
+        .then(function (args) {
+            var _max_id = args[0];
+            var _since_id = args[1];
+
+            if (_max_id) {
+                max_id = _max_id;
+                since_id = undefined;
+            } else {
+                max_id = undefined;
+                since_id = _since_id;
+            }
+
+            console.log('topics', max_id, since_id);
+
+            return [max_id, since_id];
+        })
+        .then(function (args) {
+            var max_id = args[0];
+            var since_id = args[1];
+
+            return loadTweets('from:Pixel_Dailies ', max_id, since_id)
+        })
+        .then(filterTopics)
+        .then(function (topics) {
+            console.log("Got", topics.topics.length, "new","topics.");
+            return topics;
+        })
+])
+    .then(function (args) {
+        var tweets = args[0];
+        var topics = args[1];
+
+        tweets.meta.topics_max_id = topics.meta.max_id;
+        tweets.meta.topics_since_id = topics.meta.since_id;
+
+        tweets.topics = topics.topics;
+
+        return tweets;
+    })
     .then(function (tweets) {
-        console.log("Got", tweets.tweets.length, "new", (max_id?"tail":"head"), "tweets.");
-
-        // Merge new tweets
-        //if (tweets.meta.max_id < allTweets.meta.max_id) {
-        persistenceService.setTweetsMaxId(tweets.meta.max_id);
-        //}
-        //if (tweets.meta.since_id > allTweets.meta.since_id) {
-        persistenceService.setTweetsSinceId(tweets.meta.since_id);
-        //}
-        //if (tweets.meta.topics_max_id < allTweets.meta.topics_max_id) {
-        persistenceService.setTopicsMaxId(tweets.meta.topics_max_id);
-        //}
-        //if (tweets.meta.topics_since_id > allTweets.meta.topics_since_id) {
-        persistenceService.setTopicsSinceId(tweets.meta.topics_since_id);
-        //}
-        persistenceService.setTweets(persistenceService.getTweets().concat(tweets.tweets));
-        persistenceService.setTopics(persistenceService.getTopics().concat(tweets.topics));
-
-        console.log("Collection has", persistenceService.getTweets().length, "tweets and", persistenceService.getTopics().length, "topics at all.");
+        return Promise.all([
+            persistenceService.setTweetsMaxId(tweets.meta.max_id),
+            persistenceService.setTweetsSinceId(tweets.meta.since_id),
+            persistenceService.setTopicsMaxId(tweets.meta.topics_max_id),
+            persistenceService.setTopicsSinceId(tweets.meta.topics_since_id),
+            persistenceService.getTweets().then(function (oldTweets) {
+                return persistenceService.setTweets(oldTweets.concat(tweets.tweets));
+            }),
+            persistenceService.getTopics().then(function (oldTopics) {
+                return persistenceService.setTopics(oldTopics.concat(tweets.topics))
+            })
+        ]);
+    })
+    .then(function (args) {
+        //var [tweetsMaxId, tweetsSinceId, topicsMaxId, topicsSinceId, tweets, topics] = args;
+        //var tweetsMaxId = args[0];
+        //var tweetsSinceId = args[1];
+        //var topicsMaxId = args[2];
+        //var topicsSinceId = args[3];
+        var tweets = args[4];
+        var topics = args[5];
+        console.log("Collection has", tweets.length, "tweets and", topics.length, "topics at all.");
     })
     .catch(function (err) {
         console.error(err);
-    })
+    });
