@@ -2,6 +2,7 @@
 var persistenceService = require('./persistence.js');
 var twitterService = require('./twitter.js');
 
+// static class definition
 var steps = {
     errorHandler: function (err) {
         console.error(err);
