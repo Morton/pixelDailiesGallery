@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node web.js"
+    "start": "node web.js",
+    "test": "echo \"no tests defined\""
   },
   "dependencies": {
     "body-parser": "~1.13.2",
