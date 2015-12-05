@@ -12,5 +12,5 @@ app.use('/public', express.static(path.join(__dirname, 'public')));
 app.use('/api/tweets/:topic', routes.getTweets);
 app.use('/api/topics', routes.getTopics);
 
-// startup server
-var server = app.listen(process.env.PORT || 80, () => console.log('Server is running.'));
+// export
+module.exports = app;
