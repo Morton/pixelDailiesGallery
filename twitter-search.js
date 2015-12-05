@@ -3,33 +3,8 @@
  */
 
 var persistenceService = require('./persistence.js');
-var Twitter = require('twitter');
+var twitterService = require('./twitter.js');
 
-// init
-var client = new Twitter({
-    consumer_key: process.env.TWITTER_CONSUMER_KEY,
-    consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
-    access_token_key: '',
-    access_token_secret: ''
-});
-
-function loadTweets(q, max_id, since_id) {
-    return new Promise(function (res, rej) {
-        client.get('search/tweets', {
-            max_id: max_id,
-            since_id: since_id,
-            q: q,
-            count: 100,
-            result_type: 'recent'
-        }, function (error, tweets) {
-            if (error) {
-                rej(error);
-            }
-
-            res(tweets);
-        });
-    });
-}
 function filterSearchResult(data) {
     return new Promise(function (res) {
         var result = {};
@@ -146,7 +121,7 @@ Promise.all([
             var max_id = args[0];
             var since_id = args[1];
 
-            return loadTweets('#pixel_dailies @Pixel_Dailies ', max_id, since_id)
+            return twitterService.getTweets('#pixel_dailies @Pixel_Dailies ', max_id, since_id);
         })
         .then(filterSearchResult)
         .then(function (tweets) {
@@ -174,7 +149,7 @@ Promise.all([
             var max_id = args[0];
             var since_id = args[1];
 
-            return loadTweets('from:Pixel_Dailies ', max_id, since_id)
+            return twitterService.getTweets('from:Pixel_Dailies ', max_id, since_id)
         })
         .then(filterTopics)
         .then(function (topics) {
