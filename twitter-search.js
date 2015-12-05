@@ -178,7 +178,7 @@ Promise.all([
         })
         .then(filterTopics)
         .then(function (topics) {
-            console.log("Got", topics.topics.length, "new","topics.");
+            console.log("Got", topics.topics.length, "new", "topics.");
             return topics;
         })
 ])
@@ -186,33 +186,16 @@ Promise.all([
         var tweets = args[0];
         var topics = args[1];
 
-        tweets.meta.topics_max_id = topics.meta.max_id;
-        tweets.meta.topics_since_id = topics.meta.since_id;
-
-        tweets.topics = topics.topics;
-
-        return tweets;
-    })
-    .then(function (tweets) {
         return Promise.all([
             persistenceService.setTweetsMaxId(tweets.meta.max_id),
             persistenceService.setTweetsSinceId(tweets.meta.since_id),
-            persistenceService.setTopicsMaxId(tweets.meta.topics_max_id),
-            persistenceService.setTopicsSinceId(tweets.meta.topics_since_id),
-            persistenceService.getTweets().then(function (oldTweets) {
-                return persistenceService.setTweets(oldTweets.concat(tweets.tweets));
-            }),
-            persistenceService.getTopics().then(function (oldTopics) {
-                return persistenceService.setTopics(oldTopics.concat(tweets.topics))
-            })
+            persistenceService.setTopicsMaxId(topics.meta.max_id),
+            persistenceService.setTopicsSinceId(topics.meta.since_id),
+            persistenceService.getTweets().then((oldTweets) => persistenceService.setTweets(oldTweets.concat(tweets.tweets))),
+            persistenceService.getTopics().then((oldTopics) => persistenceService.setTopics(oldTopics.concat(topics.topics)))
         ]);
     })
     .then(function (args) {
-        //var [tweetsMaxId, tweetsSinceId, topicsMaxId, topicsSinceId, tweets, topics] = args;
-        //var tweetsMaxId = args[0];
-        //var tweetsSinceId = args[1];
-        //var topicsMaxId = args[2];
-        //var topicsSinceId = args[3];
         var tweets = args[4];
         var topics = args[5];
         console.log("Collection has", tweets.length, "tweets and", topics.length, "topics at all.");
