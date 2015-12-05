@@ -1,22 +1,27 @@
 // imports
-var jsonfile = require('jsonfile');
-
-// init
-var filename = 'data.json';
-allTweets = jsonfile.readFileSync(filename);
+var persistenceService = require('./persistence.js');
 
 // static class definition
 var routes = {
     getTweets: function (req, res) {
-        var _t = allTweets.topics.filter((v)=> v.hashtags.indexOf(req.params.topic) > -1)[0];
-        res.send({
-            tweets: allTweets.tweets.filter((v)=> v.hashtags.indexOf(req.params.topic) > -1),
-            text: _t.text,
-            creation_date: _t.creation_date
-        });
+        Promise.all([persistenceService.getTweets(), persistenceService.getTopics()]).then(function (data) {
+            var tweets = data[0].filter((v)=> v.hashtags.indexOf(req.params.topic) > -1);
+            var topic = data[1].filter((v)=> v.hashtags.indexOf(req.params.topic) > -1)[0];
+
+            res.send({
+                tweets: tweets,
+                text: topic.text,
+                creation_date: topic.creation_date
+            });
+        })
     },
     getTopics: function (req, res) {
-        res.send(allTweets.topics.map((v)=> v.hashtags.filter((v) => v!='pixel_dailies')).filter((v)=>v&& v.length>0));
+        persistenceService.getTopics().then(function (topics) {
+            topics = topics.map((v)=> v.hashtags.filter((v) => v != 'pixel_dailies'));
+            topics = topics.filter((v)=>v && v.length > 0);
+
+            res.send(topics);
+        })
     }
 };
 
