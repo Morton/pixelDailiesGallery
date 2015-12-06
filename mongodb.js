@@ -7,16 +7,16 @@ var url = process.env.MONGODB_URL;
 var mongoDbService = {
     getConnection: Promise.resolve(pmongo(url)),
     getTweetsMaxId: function () {
-        return mongoDbService.config.then((c) => c.findOne({key: 'tweets_max_id'})).then((v) => parseInt(v.value));
+        return mongoDbService.config.then((c) => c.findOne({key: 'tweets_max_id'})).then((v) => (v?parseInt(v.value):Number.MAX_VALUE));
     },
     getTweetsSinceId: function () {
-        return mongoDbService.config.then((c) => c.findOne({key: 'tweets_since_id'})).then((v) => parseInt(v.value));
+        return mongoDbService.config.then((c) => c.findOne({key: 'tweets_since_id'})).then((v) => (v?parseInt(v.value):Number.MIN_VALUE));
     },
     getTopicsMaxId: function () {
-        return mongoDbService.config.then((c) => c.findOne({key: 'topics_max_id'})).then((v) => parseInt(v.value));
+        return mongoDbService.config.then((c) => c.findOne({key: 'topics_max_id'})).then((v) => (v?parseInt(v.value):Number.MAX_VALUE));
     },
     getTopicsSinceId: function () {
-        return mongoDbService.config.then((c) => c.findOne({key: 'topics_since_id'})).then((v) => parseInt(v.value));
+        return mongoDbService.config.then((c) => c.findOne({key: 'topics_since_id'})).then((v) => (v?parseInt(v.value):Number.MIN_VALUE));
     },
     setTweetsMaxId: function (newValue) {
         return mongoDbService.config.then((c) => c.update({key: 'tweets_max_id'}, {key: 'tweets_max_id', value: newValue}, {
