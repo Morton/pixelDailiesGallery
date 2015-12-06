@@ -8,7 +8,7 @@ var steps = {
         console.error(err);
     },
 
-    retrieveTweetsMaxAndSinceId: Promise.all([persistenceService.getTweetsMaxId(), persistenceService.getTweetsSinceId()]),
+    retrieveTweetsMaxAndSinceId: () => Promise.all([persistenceService.getTweetsMaxId(), persistenceService.getTweetsSinceId()]),
     calcTweetsMaxAndSinceId: function (args) {
         var _max_id = args[0];
         var _since_id = args[1];
@@ -95,7 +95,7 @@ var steps = {
         return tweets;
     },
 
-    retrieveTopicsMaxAndSinceId: Promise.all([persistenceService.getTopicsMaxId(), persistenceService.getTopicsSinceId()]),
+    retrieveTopicsMaxAndSinceId: () => Promise.all([persistenceService.getTopicsMaxId(), persistenceService.getTopicsSinceId()]),
     calcTopicMaxAndSinceId: function (args) {
         var _max_id = args[0];
         var _since_id = args[1];
@@ -158,6 +158,8 @@ var steps = {
     persistTweetsAndTopics: function (args) {
         var tweets = args[0];
         var topics = args[1];
+
+        console.log(tweets.meta.max_id, tweets.meta.since_id, topics.meta.max_id, topics.meta.since_id);
 
         return Promise.all([
             persistenceService.setTweetsMaxId(tweets.meta.max_id),
