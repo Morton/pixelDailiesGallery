@@ -19,6 +19,8 @@ function generateProcess() {
     ])
         .then(steps.persistTweetsAndTopics)
 //.then(steps.logProcessResults)
+        .then(steps.analyseDuplicates)
+        .then(() => console.log())
         .catch(steps.errorHandler)
         .then(() => generateProcess());
 }
