@@ -1,6 +1,6 @@
 // imports
-var persistenceService = require('./persistence.js');
-var twitterService = require('./twitter.js');
+var persistenceService = require('./services/persistence.js');
+var twitterService = require('./services/twitter.js');
 
 // static class definition
 var steps = {

@@ -1,5 +1,5 @@
 // imports
-var persistenceService = require('./persistence.js');
+var persistenceService = require('./services/persistence.js');
 
 // static class definition
 var routes = {

@@ -2,7 +2,7 @@
  * Created by morton on 18/11/15.
  */
 
-var steps = require('./steps.js');
+var steps = require('./js/steps.js');
 
 function generateProcess() {
     return Promise.all([
