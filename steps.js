@@ -164,8 +164,8 @@ var steps = {
             persistenceService.setTweetsSinceId(tweets.meta.since_id),
             persistenceService.setTopicsMaxId(topics.meta.max_id),
             persistenceService.setTopicsSinceId(topics.meta.since_id),
-            persistenceService.getTweets().then((oldTweets) => persistenceService.setTweets(oldTweets.concat(tweets.tweets))),
-            persistenceService.getTopics().then((oldTopics) => persistenceService.setTopics(oldTopics.concat(topics.topics)))
+            persistenceService.addTweets(tweets.tweets),
+            persistenceService.addTopics(topics.topics)
         ]);
     },
     logProcessResults: function (args) {

@@ -2,96 +2,107 @@
 var fs = require('fs');
 var jsonfile = require('jsonfile');
 
-// function fileExists
-function fileExists(filePath) {
-    try {
-        return fs.statSync(filePath).isFile();
-    }
-    catch (err) {
-        return false;
-    }
-}
-
-// load file
 var filename = 'data.json';
-var allTweets = {};
-
-if (fileExists(filename)) {
-    allTweets = jsonfile.readFileSync(filename);
-} else {
-    allTweets = {
-        meta: {
-            max_id: Number.MAX_VALUE,
-            since_id: undefined,
-            topics_max_id: Number.MAX_VALUE,
-            topics_since_id: undefined
-        },
-        tweets: [],
-        topics: []
-    };
-}
 
 // static class definition
 var jsonService = {
+    getFileContent: new Promise(function (resolve, reject) {
+        // function fileExists
+        var fileExists = function (filePath) {
+            try {
+                return fs.statSync(filePath).isFile();
+            }
+            catch (err) {
+                return false;
+            }
+        };
+
+        // load file
+        var allTweets = {};
+
+        if (fileExists(filename)) {
+            jsonfile.readFile(filename, (err, data) => (err ? reject(err) : resolve(data)));
+        } else {
+            resolve({
+                meta: {
+                    max_id: Number.MAX_VALUE,
+                    since_id: undefined,
+                    topics_max_id: Number.MAX_VALUE,
+                    topics_since_id: undefined
+                },
+                tweets: [],
+                topics: []
+            });
+        }
+    }),
+    setFileContent: function (data) {
+        return new Promise(function (resolve, reject) {
+            jsonfile.writeFile(filename, data, (err) => (err ? reject(err) : resolve(data)));
+        });
+    },
     getTweetsMaxId: function () {
-        return Promise.resolve(allTweets.meta.max_id);
+        return jsonService.getFileContent.then((allTweets) => allTweets.meta.max_id);
     },
     getTweetsSinceId: function () {
-        return Promise.resolve(allTweets.meta.since_id);
+        return jsonService.getFileContent.then((allTweets) => allTweets.meta.since_id);
     },
     getTopicsMaxId: function () {
-        return Promise.resolve(allTweets.meta.topics_max_id);
+        return jsonService.getFileContent.then((allTweets) => allTweets.meta.topics_max_id);
     },
     getTopicsSinceId: function () {
-        return Promise.resolve(allTweets.meta.topics_since_id);
+        return jsonService.getFileContent.then((allTweets) => allTweets.meta.topics_since_id);
     },
     setTweetsMaxId: function (newValue) {
-        return new Promise((res) => {
+        return jsonService.getFileContent.then((allTweets) => new Promise((res) => {
             allTweets.meta.max_id = newValue;
             jsonfile.writeFileSync(filename, allTweets);
             res(newValue);
-        });
+        }));
     },
     setTweetsSinceId: function (newValue) {
-        return new Promise((res) => {
+        return jsonService.getFileContent.then((allTweets) => new Promise((res) => {
             allTweets.meta.since_id = newValue;
             jsonfile.writeFileSync(filename, allTweets);
             res(newValue);
-        });
+        }));
     },
     setTopicsMaxId: function (newValue) {
-        return new Promise((res) => {
+        return jsonService.getFileContent.then((allTweets) => new Promise((res) => {
             allTweets.meta.topics_max_id = newValue;
             jsonfile.writeFileSync(filename, allTweets);
             res(newValue);
-        });
+        }));
     },
     setTopicsSinceId: function (newValue) {
-        return new Promise((res) => {
+        return jsonService.getFileContent.then((allTweets) => new Promise((res) => {
             allTweets.meta.topics_since_id = newValue;
             jsonfile.writeFileSync(filename, allTweets);
             res(newValue);
-        });
+        }));
     },
     getTweets: function () {
-        return Promise.resolve(allTweets.tweets);
+        return jsonService.getFileContent.then((allTweets) => allTweets.tweets);
     },
     setTweets: function (newTweets) {
-        return new Promise((res) => {
+        return jsonService.getFileContent.then((allTweets) => new Promise((res) => {
             allTweets.tweets = newTweets;
-            jsonfile.writeFileSync(filename, allTweets);
-            res(newTweets);
-        });
+            res(allTweets);
+        })).then(jsonService.setFileContent).then((allTweets) => allTweets.tweets);
+    },
+    addTweets: function (addTweets) {
+        return jsonService.getTweets().then((oldTweets) => jsonService.setTweets(oldTweets.concat(addTweets)));
     },
     getTopics: function () {
-        return Promise.resolve(allTweets.topics);
+        return jsonService.getFileContent.then((allTweets) => allTweets.topics);
     },
     setTopics: function (newTopics) {
-        return new Promise((res) => {
+        return jsonService.getFileContent.then((allTweets) => new Promise((res) => {
             allTweets.topics = newTopics;
-            jsonfile.writeFileSync(filename, allTweets);
-            res(newTopics);
-        });
+            res(allTweets);
+        })).then(jsonService.setFileContent).then((allTweets) => allTweets.topics);
+    },
+    addTopics: function (addTopics) {
+        return jsonService.getTopics().then((oldTopics) => jsonService.setTopics(oldTopics.concat(addTopics)));
     }
 };
 
