@@ -6,7 +6,7 @@ var routes = require('./routes.js');
 // setup express.js
 var app = express();
 app.use(logger('dev'));
-app.use('/public', express.static(path.join(__dirname, 'public')));
+app.use('/public', express.static(path.join(__dirname, '..', 'public')));
 
 // express.js routes
 app.use('/api/tweets/:topic', routes.getTweets);
