@@ -55,33 +55,35 @@ var jsonService = {
     setTweetsMaxId: function (newValue) {
         return jsonService.getFileContent.then((allTweets) => new Promise((res) => {
             allTweets.meta.max_id = newValue;
-            jsonfile.writeFileSync(filename, allTweets);
-            res(newValue);
-        }));
+            res(allTweets);
+        })).then(jsonService.setFileContent).then(newValue);
     },
     setTweetsSinceId: function (newValue) {
         return jsonService.getFileContent.then((allTweets) => new Promise((res) => {
             allTweets.meta.since_id = newValue;
-            jsonfile.writeFileSync(filename, allTweets);
-            res(newValue);
-        }));
+            res(allTweets);
+        })).then(jsonService.setFileContent).then(newValue);
     },
     setTopicsMaxId: function (newValue) {
         return jsonService.getFileContent.then((allTweets) => new Promise((res) => {
             allTweets.meta.topics_max_id = newValue;
-            jsonfile.writeFileSync(filename, allTweets);
-            res(newValue);
-        }));
+            res(allTweets);
+        })).then(jsonService.setFileContent).then(newValue);
     },
     setTopicsSinceId: function (newValue) {
         return jsonService.getFileContent.then((allTweets) => new Promise((res) => {
             allTweets.meta.topics_since_id = newValue;
-            jsonfile.writeFileSync(filename, allTweets);
-            res(newValue);
-        }));
+            res(allTweets);
+        })).then(jsonService.setFileContent).then(newValue);
     },
     getTweets: function () {
         return jsonService.getFileContent.then((allTweets) => allTweets.tweets);
+    },
+    getTweetsByTopic: function (topic) {
+        return jsonService.getTweets().then((tweets) => tweets.filter((v)=> v.hashtags.indexOf(topic) > -1));
+    },
+    getTopicByHashtag: function (hashtag) {
+        return jsonService.getTopics().then((topics) => topics.filter((v)=> v.hashtags.indexOf(hashtag) > -1)[0]);
     },
     setTweets: function (newTweets) {
         return jsonService.getFileContent.then((allTweets) => new Promise((res) => {
@@ -94,6 +96,11 @@ var jsonService = {
     },
     getTopics: function () {
         return jsonService.getFileContent.then((allTweets) => allTweets.topics);
+    },
+    getRelevantTopics: function () {
+        return jsonService.getTopics().then((topics) =>
+                topics.map((v)=> v.hashtags.filter((v) => v != 'pixel_dailies')).filter((v)=>v && v.length > 0)
+        );
     },
     setTopics: function (newTopics) {
         return jsonService.getFileContent.then((allTweets) => new Promise((res) => {
